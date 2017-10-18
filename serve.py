@@ -37,6 +37,7 @@ no_such_action_response = {
     "message": "No such action",
 }
 
+
 class SimpleHandler(BaseHTTPRequestHandler):
     def get_data(self):
         request_string = self.path.split("/")[-1].strip("?")
@@ -62,6 +63,7 @@ class SimpleHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(no_such_action_response))
 
         self.wfile.close()
+
 
 server_address = ('', 49170)
 
