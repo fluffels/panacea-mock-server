@@ -1,13 +1,41 @@
-from datetime import datetime
+import json
+import logging
+import logstash
+import urllib
 
 from BaseHTTPServer import HTTPServer
 from BaseHTTPServer import BaseHTTPRequestHandler
-
-import urllib
-
+from datetime import datetime
+from logging.config import dictConfig
 from uuid import uuid4
 
-import json
+dictConfig({
+    'version': 1,
+    'root': {
+        'handlers': ['console', 'logstash'],
+        'level': 'INFO',
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+        },
+        'logstash': {
+            'level': 'INFO',
+            'class': 'logstash.TCPLogstashHandler',
+            'host': 'localhost',
+            'port': 49160,
+            'version': 1,
+            'message_type': 'logstash',
+            'fqdn': False,
+            'tags': [
+                'panacea_mock',
+            ],
+        },
+    },
+})
+
+logger = logging.getLogger(__name__)
 
 messages = [
     {
@@ -57,7 +85,7 @@ class SimpleHandler(BaseHTTPRequestHandler):
         elif data['action'] == 'message_send':
             text = urllib.unquote(data['text'])
             text = text.replace('+', ' ')
-            self.log_message('Fake sending message: \n\n%s', text)
+            logger.info('Fake sending message: \n\n%s', text)
             self.wfile.write(json.dumps(messages_send_response))
         else:
             self.wfile.write(json.dumps(no_such_action_response))
